@@ -153,3 +153,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+### DevCon files
+# History file
+.devcon-history.txt
