@@ -1,6 +1,7 @@
 //! Internal commands.
 
 use ansi_term::Colour::*;
+use crate::util::print_help;
 
 // input is guaranteed to NOT be blank.
 pub fn resolve_function(input: impl AsRef<str>) -> bool {
@@ -8,6 +9,7 @@ pub fn resolve_function(input: impl AsRef<str>) -> bool {
 	match input.split_whitespace().next().unwrap() {
 		"cd" => change_dir(input),
 		"devconinfo" => print_devcon_info(),
+		"help" => print_help(),
 		&_ => {
 			return false;
 		}

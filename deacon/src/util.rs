@@ -1,5 +1,9 @@
 use ansi_term::ANSIGenericString;
 use ansi_term::Colour::*;
+use comfy_table::*;
+use comfy_table::modifiers::UTF8_ROUND_CORNERS;
+use comfy_table::presets::UTF8_FULL;
+use lazy_static::lazy_static;
 
 pub fn colorize_bool(boolean: bool) -> ANSIGenericString<'static, str> {
 	if boolean {
@@ -42,4 +46,31 @@ pub fn print_prompt() {
 	// end of integrations
 
 	println!();
+}
+
+lazy_static! {
+	static ref HELP_TABLE: Table = {
+		let mut table = Table::new();
+	table
+		.load_preset(UTF8_FULL)
+		.apply_modifier(UTF8_ROUND_CORNERS)
+		.set_content_arrangement(ContentArrangement::Dynamic)
+		.set_width(40)
+		.set_header(vec!["Command", "Description", "Example"])
+		.add_row(vec![
+			"help",
+			"Print help information.",
+			"help"
+		])
+		.add_row(vec![
+			"cd <path>",
+			"Change directory to the given path.",
+			"cd /"
+		]);
+		table
+	};
+}
+
+pub fn print_help() {
+	println!("{}", HELP_TABLE.to_string());
 }

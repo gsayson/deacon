@@ -3,28 +3,25 @@ mod integrations;
 mod util;
 mod env;
 
-use std::io::Read;
 use std::path::Path;
 use std::sync::mpsc;
 use std::time::{SystemTime, UNIX_EPOCH};
 use ansi_term::Colour::*;
-use chrono::{NaiveDateTime, TimeZone, Utc};
-use duct::ReaderHandle;
+use chrono::*;
 use guess_host_triple::guess_host_triple;
 use rustyline::*;
 use rustyline::config::Configurer;
 use rustyline::error::ReadlineError;
 use crate::commands::resolve_function;
 use crate::env::execute_process;
-use crate::integrations::rust::{get_crate_manifest, is_cargo_workspace};
 use crate::util::print_prompt;
 
 fn main() -> Result<()> {
-    //return Err(ReadlineError::Io(io::Error::last_os_error()));
     #[cfg(windows)]
     ansi_term::enable_ansi_support().unwrap();
+
     println!("{} [{} {} on {}]",
-             Yellow.bold().paint("DevCon"),
+             Yellow.bold().paint("Deacon Shell"),
              Cyan.paint(env!("CARGO_PKG_VERSION")),
              {
                 if !env!("CARGO_PKG_VERSION").starts_with("0.") {
@@ -35,7 +32,15 @@ fn main() -> Result<()> {
             },
             Cyan.bold().paint(guess_host_triple().unwrap_or("unknown"))
     );
-    println!("{}", RGB(255, 165, 0).bold().paint(format!("Current PID: {}", std::process::id())));
+    println!("{}", RGB(255, 165, 0).bold().paint(format!("Current PID: {}{}", std::process::id(), {
+        if Local::now().month() == 12 {
+            " | Merry Christmas!"
+        } else if Local::now().month() == 10 {
+            " | Happy Halloween!"
+        } else {
+            ""
+        }
+    })));
     let mut rl = Editor::<()>::with_config(
         Config::builder()
             .completion_type(CompletionType::List)
@@ -72,7 +77,7 @@ fn main() -> Result<()> {
     }
     println!("For help, type `help` and hit enter.\n");
     loop {
-        util::print_prompt();
+        print_prompt();
         let readline = rl.readline("$ ");
         match readline {
             Ok(line) => {
@@ -86,18 +91,20 @@ fn main() -> Result<()> {
                         print!("\x1B[2J\x1B[1;1H");
                     } else if !resolve_function(&line) {
                         // execute a process
-                        if let Some((command, mut child)) = execute_process(line) {
-                            // let stdin = child.stdin.take().unwrap();
-                            // let stdout = child.stdout.take().unwrap();
-                            // let (so, ra) = mpsc::channel::<bool>();
-                            // println!("{}", stdout.take())
-                            // currently, we only print to console
-                            // piping to a file tbd
+                        if let Some((_command, mut child)) = execute_process(line) {
+                            // let pid = child.id();
                             while let Ok(None) = child.try_wait() {
-                                // pass
+                                // if rx.try_recv().is_ok() {
+                                //     #[cfg(windows)]
+                                //     unsafe {
+                                //         use windows::Win32::System::Console::*;
+                                //         AttachConsole(pid);
+                                //         GenerateConsoleCtrlEvent(CTRL_C_EVENT, pid);
+                                //     }
+                                // }
                             }
-                            println!();
                         }
+                        println!();
                     } else {
                         println!();
                     }
