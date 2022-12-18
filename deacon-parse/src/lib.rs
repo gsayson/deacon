@@ -1,5 +1,3 @@
-use nom::branch::alt;
-use nom::bytes::complete::{tag, take_while};
 use nom::character::complete::char;
 use nom::error::ParseError;
 use nom::{AsChar, InputTakeAtPosition, IResult};
@@ -7,12 +5,26 @@ use nom::multi::many1;
 use nom::sequence::delimited;
 
 /// Parses environment variables. If there is no environmental variable to substitute, this function will return [`None`].
+/// Environment variables are delimited in `?`.
+///
+/// ```
+/// # use deacon_parse::parse_env_vars;
+/// assert_eq!(parse_env_vars("?"), None);
+/// assert_eq!(parse_env_vars("??"), Some(vec![""]));
+/// assert_eq!(parse_env_vars("???"), Some(vec![""]));
+/// assert_eq!(parse_env_vars("?hi??"), Some(vec!["hi"]));
+/// assert_eq!(parse_env_vars("?__??"), Some(vec!["__"]));
+/// assert_eq!(parse_env_vars("?hi???"), Some(vec!["hi", ""]));
+/// assert_eq!(parse_env_vars("?gamma_delta?"), Some(vec!["gamma_delta"]));
+/// assert_eq!(parse_env_vars("????"), Some(vec!["", ""]));
+/// assert_eq!(parse_env_vars("?foo?"), Some(vec!["foo"]));
+/// assert_eq!(parse_env_vars("?space??bar?"), Some(vec!["space", "bar"]));
+/// ```
 pub fn parse_env_vars(input: &str) -> Option<Vec<&str>> {
-
 	let res = many1(delimited(
-		char('$'),
+		char('?'),
 		alpha_underscore_0::<&str, ()>,
-		char('$')
+		char('?')
 	))(input);
 	match res {
 		Ok((_, b)) => {
@@ -37,16 +49,16 @@ mod tests {
 
     #[test]
     fn parse_env_var() {
-	    assert_eq!(parse_env_vars("$"), None);
-	    assert_eq!(parse_env_vars("$$"), Some(vec![""]));
-	    assert_eq!(parse_env_vars("$$$"), Some(vec![""]));
-	    assert_eq!(parse_env_vars("$hi$$"), Some(vec!["hi"]));
-	    assert_eq!(parse_env_vars("$__$$"), Some(vec!["__"]));
-	    assert_eq!(parse_env_vars("$hi$$$"), Some(vec!["hi", ""]));
-	    assert_eq!(parse_env_vars("$gamma_delta$"), Some(vec!["gamma_delta"]));
-	    assert_eq!(parse_env_vars("$$$$"), Some(vec!["", ""]));
-	    assert_eq!(parse_env_vars("$foo$"), Some(vec!["foo"]));
-	    assert_eq!(parse_env_vars("$space$$bar$"), Some(vec!["space", "bar"]));
+	    assert_eq!(parse_env_vars("?"), None);
+	    assert_eq!(parse_env_vars("??"), Some(vec![""]));
+	    assert_eq!(parse_env_vars("???"), Some(vec![""]));
+	    assert_eq!(parse_env_vars("?hi??"), Some(vec!["hi"]));
+	    assert_eq!(parse_env_vars("?__??"), Some(vec!["__"]));
+	    assert_eq!(parse_env_vars("?hi???"), Some(vec!["hi", ""]));
+	    assert_eq!(parse_env_vars("?gamma_delta?"), Some(vec!["gamma_delta"]));
+	    assert_eq!(parse_env_vars("????"), Some(vec!["", ""]));
+	    assert_eq!(parse_env_vars("?foo?"), Some(vec!["foo"]));
+	    assert_eq!(parse_env_vars("?space??bar?"), Some(vec!["space", "bar"]));
     }
 
 }

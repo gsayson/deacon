@@ -1,15 +1,14 @@
 //! Environment management and process execution.
 
-use std::ffi::OsString;
-use std::ops::Add;
 use std::process::*;
 use ansi_term::Colour::Red;
-use lazy_static::lazy_static;
-use regex::Regex;
 
 /// Executes a process. Printing to the console is not done.
 pub fn execute_process(input: impl ToString) -> Option<(Command, Child)> {
-	let input = input.to_string();
+	let mut input = input.to_string();
+	input = input.replace("\\", "\\\\");
+	input = input.replace("\\\\\"", "\\\"");
+	input = input.replace("\\\\\\\\", "\\\\");
 	match shell_words::split(input.as_str()) {
 		Ok(split) => {
 			let split: Vec<String> = split;
@@ -34,4 +33,32 @@ pub fn execute_process(input: impl ToString) -> Option<(Command, Child)> {
 			None
 		}
 	}
+}
+
+/// Substitutes environment variables into the new ones.
+#[must_use]
+pub fn substitute_env_var(input: impl AsRef<str>) -> String {
+	let mut vec: Vec<String> = vec![];
+	let input = input.as_ref();
+	for s in input.split_whitespace() {
+		let mut s = String::from(s);
+		let s_clone = s.clone();
+		if let Some(vars) = deacon_parse::parse_env_vars(&s_clone) {
+			for var in vars {
+				let var_representation = String::from("?") + var + "?";
+				let val = std::env::var(&var).unwrap_or(var_representation.clone());
+				s = s.replace(
+					&var_representation,
+					val.as_str()
+				);
+			}
+		}
+		vec.push(s);
+	}
+	vec.join(" ")
+}
+
+#[test]
+fn test() {
+    println!("{:?}", shell_words::split(r#"C:\s \" \\"#).unwrap());
 }

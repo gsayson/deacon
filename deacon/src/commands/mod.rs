@@ -4,7 +4,7 @@ use std::env;
 use std::time::UNIX_EPOCH;
 use ansi_term::Colour::*;
 use byte_unit::Byte;
-use chrono::{Local, NaiveDateTime, Offset, TimeZone};
+use chrono::{Local, NaiveDateTime};
 use comfy_table::presets::UTF8_FULL;
 use comfy_table::Table;
 use crate::util::print_help;

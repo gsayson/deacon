@@ -4,7 +4,6 @@ mod util;
 mod env;
 
 use std::path::Path;
-use std::sync::mpsc;
 use std::time::{SystemTime, UNIX_EPOCH};
 use ansi_term::Colour::*;
 use chrono::*;
@@ -91,31 +90,36 @@ fn main() -> Result<()> {
                 if is_blank(&line) {
                     println!();
                     continue;
-                } else if !line.starts_with("exit") {
-                    rl.add_history_entry(line);
-                    if line.starts_with("clear") {
-                        print!("\x1B[2J\x1B[1;1H");
-                    } else if !resolve_function(&line) {
-                        // execute a process
-                        if let Some((_command, mut child)) = execute_process(line) {
-                            // let pid = child.id();
-                            while let Ok(None) = child.try_wait() {
-                                // if rx.try_recv().is_ok() {
-                                //     #[cfg(windows)]
-                                //     unsafe {
-                                //         use windows::Win32::System::Console::*;
-                                //         AttachConsole(pid);
-                                //         GenerateConsoleCtrlEvent(CTRL_C_EVENT, pid);
-                                //     }
-                                // }
-                            }
-                        }
-                        println!();
-                    } else {
-                        println!();
-                    }
                 } else {
-                    break
+                    let line = env::substitute_env_var(line);
+                    println!("{}", line);
+                    let line = &line;
+                    if !line.starts_with("exit") {
+                        rl.add_history_entry(line);
+                        if line.starts_with("clear") {
+                            print!("\x1B[2J\x1B[1;1H");
+                        } else if !resolve_function(&line) {
+                            // execute a process
+                            if let Some((_command, mut child)) = execute_process(line) {
+                                // let pid = child.id();
+                                while let Ok(None) = child.try_wait() {
+                                    // if rx.try_recv().is_ok() {
+                                    //     #[cfg(windows)]
+                                    //     unsafe {
+                                    //         use windows::Win32::System::Console::*;
+                                    //         AttachConsole(pid);
+                                    //         GenerateConsoleCtrlEvent(CTRL_C_EVENT, pid);
+                                    //     }
+                                    // }
+                                }
+                            }
+                            println!();
+                        } else {
+                            println!();
+                        }
+                    } else {
+                        break
+                    }
                 }
             },
             Err(ReadlineError::Interrupted) => {
