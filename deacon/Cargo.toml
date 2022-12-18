@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+deacon-parse = { path = "../deacon-parse" }
 rustyline = "10.0.0"
 miette = { version = "5.5.0", features = ["fancy"] }
 anyhow = "1.0.66"
