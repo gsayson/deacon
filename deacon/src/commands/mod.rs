@@ -70,7 +70,6 @@ pub fn list_dir(input: impl AsRef<str>) {
 	}
 	match dir {
 		Ok(dir) => {
-			println!("Listing for {}", dir.display());
 			table.set_header(vec![
 				"File",
 				"Type",
