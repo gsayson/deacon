@@ -63,9 +63,9 @@ lazy_static! {
 			"Change directory to the given path.",
 			"cd /"
 		]).add_row(vec![
-			"dir (path)",
+			"ls (path)",
 			"List the given directory's files. If a directory is not provided, it defaults to the current working directory.",
-			"cd /"
+			"ls"
 		]);
 		table
 	};
