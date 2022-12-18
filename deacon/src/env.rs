@@ -6,6 +6,9 @@ use ansi_term::Colour::Red;
 /// Executes a process. Printing to the console is not done.
 pub fn execute_process(input: impl ToString) -> Option<(Command, Child)> {
 	let mut input = input.to_string();
+	if input.starts_with("!") {
+		input = input.replacen("!", "", 1);
+	}
 	input = input.replace("\\", "\\\\");
 	input = input.replace("\\\\\"", "\\\"");
 	input = input.replace("\\\\\\\\", "\\\\");

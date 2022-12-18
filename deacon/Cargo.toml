@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 deacon-parse = { path = "../deacon-parse" }
 rustyline = "10.0.0"
+rustyline-derive = "0.7.0"
 miette = { version = "5.5.0", features = ["fancy"] }
 anyhow = "1.0.66"
 ansi_term = "0.12.1"
@@ -15,14 +16,13 @@ chrono = { version = "0.4.23", features = ["std"] }
 cargo_toml = "0.13.0"
 toml = "0.5.10"
 serde = "1.0.150"
-duct = "0.13.6"
 shell-words = "1.1.0"
 ctrlc = "3.2.4"
-regex = "1.7.0"
 lazy_static = "1.4.0"
 comfy-table = "6.1.3"
 byte-unit = "4.0.18"
-unescape = "0.1.0"
+git2 = "0.15.0"
+substring = "1.4.5"
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.43.0", features = [
