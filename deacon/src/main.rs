@@ -16,10 +16,17 @@ use crate::commands::resolve_function;
 use crate::env::execute_process;
 use crate::util::print_prompt;
 
+const ASCII_LOGO: &str =
+r#"    ____
+   / __ \___  ____ __________  ____
+  / / / / _ \/ __ `/ ___/ __ \/ __ \
+ / /_/ /  __/ /_/ / /__/ /_/ / / / /
+/_____/\___/\__,_/\___/\____/_/ /_/"#;
+
 fn main() -> Result<()> {
     #[cfg(windows)]
     ansi_term::enable_ansi_support().unwrap();
-
+    println!("{}\n", Yellow.bold().paint(ASCII_LOGO));
     println!("{} [{} {} on {}]",
              Yellow.bold().paint("Deacon Shell"),
              Cyan.paint(env!("CARGO_PKG_VERSION")),
@@ -52,7 +59,7 @@ fn main() -> Result<()> {
         let md = history_path.metadata().expect("able to get metadata");
         match md.modified() {
             Ok(time) => {
-                fn system_time_to_date_time(t: SystemTime) -> NaiveDateTime {
+                fn system_time_to_date_time(t: SystemTime) -> DateTime<Local> {
                     let (sec, nsec) = match t.duration_since(UNIX_EPOCH) {
                         Ok(dur) => (dur.as_secs() as i64, dur.subsec_nanos()),
                         Err(e) => {
@@ -65,8 +72,7 @@ fn main() -> Result<()> {
                             }
                         },
                     };
-                    Utc.timestamp_opt(sec, nsec).unwrap()
-                        .naive_local()
+                    NaiveDateTime::from_timestamp_opt(sec, nsec).unwrap().and_local_timezone(Local).earliest().unwrap()
                 }
                 println!("Restored previous session on {}.", Blue.bold().paint(system_time_to_date_time(time).format("%d %B %Y %I:%M %p").to_string()));
             }

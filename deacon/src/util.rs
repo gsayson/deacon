@@ -1,7 +1,6 @@
 use ansi_term::ANSIGenericString;
 use ansi_term::Colour::*;
 use comfy_table::*;
-use comfy_table::modifiers::UTF8_ROUND_CORNERS;
 use comfy_table::presets::UTF8_FULL;
 use lazy_static::lazy_static;
 
@@ -53,18 +52,19 @@ lazy_static! {
 		let mut table = Table::new();
 	table
 		.load_preset(UTF8_FULL)
-		.apply_modifier(UTF8_ROUND_CORNERS)
 		.set_content_arrangement(ContentArrangement::Dynamic)
-		.set_width(40)
 		.set_header(vec!["Command", "Description", "Example"])
 		.add_row(vec![
 			"help",
 			"Print help information.",
 			"help"
-		])
-		.add_row(vec![
+		]).add_row(vec![
 			"cd <path>",
 			"Change directory to the given path.",
+			"cd /"
+		]).add_row(vec![
+			"dir (path)",
+			"List the given directory's files. If a directory is not provided, it defaults to the current working directory.",
 			"cd /"
 		]);
 		table
