@@ -1,2 +1,2 @@
 [workspace]
-members = ["deacon", "deacon-config", "deacon-parse"]
+members = ["deacon", "deacon-config", "deacon-parse", "deacon-setup"]

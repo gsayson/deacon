@@ -92,7 +92,7 @@ fn main() -> Result<()> {
     })));
     let mut rl = Editor::<MyHelper>::with_config(
         Config::builder()
-            .completion_type(CompletionType::List)
+            .completion_type(CompletionType::Circular)
             .history_ignore_space(true)
             .build()
     )?;
