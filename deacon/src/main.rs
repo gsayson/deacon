@@ -1,3 +1,5 @@
+#![feature(let_chains)]
+
 mod commands;
 mod integrations;
 mod util;
@@ -92,7 +94,6 @@ fn main() -> Result<()> {
                     continue;
                 } else {
                     let line = env::substitute_env_var(line);
-                    println!("{}", line);
                     let line = &line;
                     if !line.starts_with("exit") {
                         rl.add_history_entry(line);
