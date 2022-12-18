@@ -13,11 +13,15 @@ use crate::util::print_help;
 // input is guaranteed to NOT be blank.
 pub fn resolve_function(input: impl AsRef<str>) -> bool {
 	let input = input.as_ref();
+	if input.trim().starts_with("!") {
+		// execute literally the given process and its args
+		return false;
+	}
 	match input.split_whitespace().next().unwrap() {
 		"cd" => change_dir(input),
 		"devconinfo" => print_devcon_info(),
 		"help" => print_help(),
-		"dir" => list_dir(input),
+		"ls" => list_dir(input),
 		&_ => {
 			return false;
 		}
