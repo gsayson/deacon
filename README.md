@@ -27,11 +27,10 @@ func x() {
 }
 ```
 
-You must end with a newline before the ending `}`. In other words,
+You must start with a newline before the `{` character and end with another newline before the ending `}`. In other words,
 
 ```
-func x() { 
-    echo "Hello, world!" 
+func x() { echo "Hello, world!" 
     echo "Hallo Welt!" }
 ```
 
