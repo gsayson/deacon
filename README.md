@@ -27,24 +27,20 @@ func x() {
 }
 ```
 
-Commands can also be chained in the same line as so:
+You must end with a newline before the ending `}`. In other words,
 
 ```
-func x() {
-    echo "Hello, world!"; echo "Hallo Welt!"
-}
-```
-
-The only restriction is that you must end with a newline or a semicolon before the ending `}`. In other words,
-
-```
-func x() { echo "Hello, world!"; echo "Hallo Welt!" }
+func x() { 
+    echo "Hello, world!" 
+    echo "Hallo Welt!" }
 ```
 
 will produce an error, and
 
 ```
-func x() { echo "Hello, world!"; echo "Hallo Welt!"; }
+func x() { 
+    echo "Hello, world!"
+}
 ```
 
 will not.
