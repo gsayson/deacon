@@ -11,5 +11,3 @@ be on par with mature shells like `bash`.
 Currently, Deacon is still in development. If you still want to use Deacon, clone this repository
 and build it using `cargo +nightly build`.
 This requires Rust `1.68.0`.
-
-## Gallery
