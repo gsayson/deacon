@@ -15,7 +15,7 @@ pub fn colorize_bool(boolean: bool) -> ANSIGenericString<'static, str> {
 pub fn print_prompt() {
 	use crate::integrations::rust::*;
 	use crate::integrations::git;
-	use crate::integrations::git::is_git_project;
+	use crate::integrations::git::get_nearest_git_repository;
 	print!(
 		"{}: {} ",
 		Green.bold().paint(format!("{}@{}", whoami::username(), whoami::hostname())),
@@ -45,9 +45,9 @@ pub fn print_prompt() {
 	}
 
 	// git integration
-	if is_git_project(std::env::current_dir().unwrap()) {
+	if let Some(repo) = get_nearest_git_repository(std::env::current_dir().unwrap()) {
 		print!("{} ", RGB(255, 165, 0).paint(
-			git::get_integration(std::env::current_dir().unwrap())
+			git::get_integration(repo)
 				.unwrap_or("".to_string())
 		));
 	}

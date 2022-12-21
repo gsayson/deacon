@@ -1,21 +1,23 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use git2::{BranchType, Repository};
 use nerd_fonts::NerdFonts;
 
-pub fn is_git_project(dir: impl AsRef<Path>) -> bool {
+pub fn get_nearest_git_repository(dir: impl AsRef<Path>) -> Option<PathBuf> {
 	let dir = dir.as_ref();
-	Repository::open(dir).is_ok()
-	|| {
+	if Repository::open(dir).is_ok() {
+		Some(dir.to_path_buf())
+	} else {
 		if let Some(parent) = dir.parent() {
-			is_git_project(dir)
+			get_nearest_git_repository(parent)
 		} else {
-			false
+			None
 		}
 	}
 }
 
 pub fn get_integration(dir: impl AsRef<Path>) -> Option<String> {
-	let repo = Repository::open(dir.as_ref()).unwrap();
+	let dir = dir.as_ref();
+	let repo = Repository::open(dir).unwrap();
 	let binding = repo.branches(Some(BranchType::Local)).ok()?.next()?.ok()?;
 	let br = binding.0.name().ok()??;
 	Some(
