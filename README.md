@@ -1,7 +1,7 @@
 <div style="text-align: center;"><h1>Deacon</h1></div>
 <div style="text-align: center;">Shell 0.2.1</div>
 <br>
-<div style="text-align: center;"><img src="../../images/deacon-example.png" alt="The greeting"></div>
+<div style="text-align: center;"><img src="images/deacon-example.png" alt="The greeting"></div>
 
 ## About
 Deacon is a cross-platform shell that aims to replace `cmd.exe` and PowerShell for Windows users, and to
