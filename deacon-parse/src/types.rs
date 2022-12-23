@@ -1,3 +1,5 @@
+//! Deacon types.
+
 use std::hint::unreachable_unchecked;
 use nom::character::complete::{alpha1, char, multispace0};
 use nom::error::VerboseError;

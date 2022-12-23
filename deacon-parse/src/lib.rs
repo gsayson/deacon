@@ -1,10 +1,11 @@
 #![feature(option_result_contains)]
 
 pub mod function;
-mod types;
+pub mod types;
+pub mod variable;
 
 use nom::character::complete::char;
-use nom::error::{ErrorKind, ParseError};
+use nom::error::{ErrorKind, ParseError, VerboseError};
 use nom::{AsChar, InputTakeAtPosition, IResult};
 use nom::multi::many1;
 use nom::sequence::delimited;
@@ -55,12 +56,19 @@ pub(crate) fn alpha_underscore_1<T: InputTakeAtPosition, E: ParseError<T>>(input
 	}), ErrorKind::Alpha)
 }
 
+pub(crate) static MAP_ERR: fn(nom::Err<VerboseError<&str>>) -> VerboseError<&str> = |f| {
+	match f {
+		nom::Err::Incomplete(_) => unsafe { std::hint::unreachable_unchecked() },
+		nom::Err::Error(e) | nom::Err::Failure(e) => e
+	}
+};
+
 #[cfg(test)]
 mod tests {
     use super::*;
 	use function::*;
 	use types::*;
-	use crate::types::DeaconType::String;
+	use variable::*;
 
 	#[test]
     fn parse_env_var() {
@@ -119,6 +127,15 @@ mod tests {
 		assert_eq!(DeaconType::try_from("int"), Ok(Int));
 		assert_eq!(DeaconType::try_from("(string, int)"), Ok(Tuple(vec![String, Int])));
 		assert!(DeaconType::try_from("(string, int, (string, int))").is_err()); // tuples directly in a tuple are not supported.
+	}
+
+	#[test]
+	fn parse_variable_decls() {
+	    assert_eq!(parse_variable_decl("let var = 1").ok(), None);
+		assert_eq!(parse_variable_decl("let $var = hello").ok(), Some(Variable { identifier: "var".to_string(), value: "hello".to_string() }));
+		assert_eq!(parse_variable_decl("let $ = 1").ok(), None);
+		assert_eq!(parse_variable_decl("let $$ = 1").ok(), None);
+		assert_eq!(parse_variable_decl("let $abc = \"def\"").ok(), Some(Variable { identifier: "abc".to_string(), value: "\"def\"".to_string() }));
 	}
 
 }

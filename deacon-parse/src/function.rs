@@ -38,31 +38,16 @@ pub fn parse_func_declaration(input: &str) -> Result<Function, VerboseError<&str
 		input = export_tag.unwrap().0;
 	}
 	let input = input.trim();
-	let header = tag::<_, &str, VerboseError<&str>>("func")(input).map_err(|f| {
-		match f {
-			nom::Err::Incomplete(_) => unsafe { unreachable_unchecked() },
-			nom::Err::Error(e) | nom::Err::Failure(e) => e
-		}
-	})?.0.trim();
+	let header = tag::<_, &str, VerboseError<&str>>("func")(input).map_err(crate::MAP_ERR)?.0.trim();
 	let (args, name) = terminated(alpha_underscore_1::<&str, VerboseError<&str>>, tag::<_, &str, VerboseError<&str>>("("))(header)
-		.map_err(|f| {
-			match f {
-				nom::Err::Incomplete(_) => unsafe { unreachable_unchecked() },
-				nom::Err::Error(e) | nom::Err::Failure(e) => e
-			}
-		})?;
+		.map_err(crate::MAP_ERR)?;
 	let (code_block, args) = terminated(
 		separated_list0(
 			tuple((char::<&str, VerboseError<&str>>(','), multispace0::<&str, VerboseError<&str>>)),
 			tuple((alpha_underscore_1::<&str, VerboseError<&str>>, multispace0::<&str, VerboseError<&str>>, char::<&str, VerboseError<&str>>(':'), multispace0::<&str, VerboseError<&str>>, alpha1::<&str, VerboseError<&str>>))
 		),
 		tag(")") // discard
-	)(args).map_err(|f| {
-		match f {
-			nom::Err::Incomplete(_) => unsafe { unreachable_unchecked() },
-			nom::Err::Error(e) | nom::Err::Failure(e) => e
-		}
-	})?;
+	)(args).map_err(crate::MAP_ERR)?;
 	// parsing header end
 	// parsing block starts
 	let code_block = code_block.trim();
@@ -75,12 +60,7 @@ pub fn parse_func_declaration(input: &str) -> Result<Function, VerboseError<&str
 			multispace0::<&str, VerboseError<&str>>
 			))),
 		char::<&str, VerboseError<&str>>('}')
-	)(code_block).map_err(|f| {
-		match f {
-			nom::Err::Incomplete(_) => unsafe { unreachable_unchecked() },
-			nom::Err::Error(e) | nom::Err::Failure(e) => e
-		}
-	})?;
+	)(code_block).map_err(crate::MAP_ERR)?;
 	let statements = statements.into_iter().map(|f| f.1.trim().to_string()).collect::<Vec<String>>();
 	// parsing block end
 	Ok(Function {
