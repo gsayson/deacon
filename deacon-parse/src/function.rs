@@ -23,13 +23,13 @@ use crate::alpha_underscore_1;
 /// This substitutes the given `parameter` of the `echo` *function* into the argument placeholder of the `echo` *command*.
 /// Note that functions' names cannot be the names of reserved keywords, such as `func`, `using`, or the name of any data type.
 ///
-/// Exporting a function allows the shell environment to run that function.
+/// Exporting a function allows the **current** shell environment to run that function.
 ///
 /// For more details on statements, see [`parse_call`].
 ///
 /// Note that while `func` is a reserved keyword, if there is an executable literally named `func` one can run it
 /// using the exclamation-escape syntax, in this case `!func`.
-pub fn parse_func_declaration(input: &str) -> Result<Function, VerboseError<&str>> {
+pub fn parse_func_declaration(input: &str) -> Result<(Function, &str), VerboseError<&str>> {
 	// parsing header start
 	let mut input = input;
 	let export_tag = tag::<_, &str, ()>("export")(input);
@@ -51,7 +51,7 @@ pub fn parse_func_declaration(input: &str) -> Result<Function, VerboseError<&str
 	// parsing header end
 	// parsing block starts
 	let code_block = code_block.trim();
-	let (_, statements): (&str, Vec<(_, &str, _, _)>) = delimited(
+	let (remainder, statements): (&str, Vec<(_, &str, _, _)>) = delimited(
 		tuple((char::<&str, VerboseError<&str>>('{'), newline::<&str, VerboseError<&str>>)),
 		many0(tuple((
 			multispace0::<&str, VerboseError<&str>>,
@@ -63,21 +63,22 @@ pub fn parse_func_declaration(input: &str) -> Result<Function, VerboseError<&str
 	)(code_block).map_err(crate::MAP_ERR)?;
 	let statements = statements.into_iter().map(|f| f.1.trim().to_string()).collect::<Vec<String>>();
 	// parsing block end
-	Ok(Function {
-		name: name.to_string(),
-		args: {
-			let args = args;
-			args.into_iter()
-				.map(|f| {
-					FormalArg {
-						identifier: f.0.to_string(),
-						r#type: f.4.to_string(),
-					}
-				})
-				.collect::<Vec<FormalArg>>()
+	Ok((Function {
+			name: name.to_string(),
+			args: {
+				let args = args;
+				args.into_iter()
+					.map(|f| {
+						FormalArg {
+							identifier: f.0.to_string(),
+							r#type: f.4.to_string(),
+						}
+					})
+					.collect::<Vec<FormalArg>>()
+			},
+			body: statements,
 		},
-		body: statements,
-	})
+	remainder))
 }
 
 /// Parses a call. The syntax for a call is:
