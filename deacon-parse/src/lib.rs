@@ -118,7 +118,7 @@ mod tests {
 		assert_eq!(DeaconType::try_from("string"), Ok(String));
 		assert_eq!(DeaconType::try_from("int"), Ok(Int));
 		assert_eq!(DeaconType::try_from("(string, int)"), Ok(Tuple(vec![String, Int])));
-		assert_eq!(DeaconType::try_from("(string, int, (string, int))"), None); // tuples directly in a tuple are not supported.
+		assert!(DeaconType::try_from("(string, int, (string, int))").is_err()); // tuples directly in a tuple are not supported.
 	}
 
 }
