@@ -3,6 +3,7 @@
 use std::hint::unreachable_unchecked;
 use nom::bytes::complete::{tag, take_till, take_while};
 use nom::character::complete::{alpha1, char, multispace0, newline};
+use nom::combinator::cut;
 use nom::error::VerboseError;
 use nom::multi::{many0, separated_list0};
 use nom::sequence::{delimited, terminated, tuple};
@@ -29,7 +30,14 @@ use crate::alpha_underscore_1;
 ///
 /// Note that while `func` is a reserved keyword, if there is an executable literally named `func` one can run it
 /// using the exclamation-escape syntax, in this case `!func`.
-pub fn parse_func_declaration(input: &str) -> Result<(Function, &str), VerboseError<&str>> {
+///
+/// This function, compared to other functions, returns a layer of [metadata](nom::Err) since this
+/// parser uses **streaming** parsers (since it has to handle newlines).
+pub fn parse_func_declaration(input: &str) -> Result<(Function, &str), nom::Err<VerboseError<&str>>> {
+
+	use nom::bytes::streaming::{tag, take_till, take_while};
+	use nom::character::streaming::{alpha1, char, multispace0, newline};
+
 	// parsing header start
 	let mut input = input;
 	let export_tag = tag::<_, &str, ()>("export")(input);
@@ -38,16 +46,15 @@ pub fn parse_func_declaration(input: &str) -> Result<(Function, &str), VerboseEr
 		input = export_tag.unwrap().0;
 	}
 	let input = input.trim();
-	let header = tag::<_, &str, VerboseError<&str>>("func")(input).map_err(crate::MAP_ERR)?.0.trim();
-	let (args, name) = terminated(alpha_underscore_1::<&str, VerboseError<&str>>, tag::<_, &str, VerboseError<&str>>("("))(header)
-		.map_err(crate::MAP_ERR)?;
+	let header = cut(tag::<_, &str, VerboseError<&str>>("func"))(input)?.0.trim();
+	let (args, name) = terminated(alpha_underscore_1::<&str, VerboseError<&str>>, tag::<_, &str, VerboseError<&str>>("("))(header)?;
 	let (code_block, args) = terminated(
 		separated_list0(
 			tuple((char::<&str, VerboseError<&str>>(','), multispace0::<&str, VerboseError<&str>>)),
 			tuple((alpha_underscore_1::<&str, VerboseError<&str>>, multispace0::<&str, VerboseError<&str>>, char::<&str, VerboseError<&str>>(':'), multispace0::<&str, VerboseError<&str>>, alpha1::<&str, VerboseError<&str>>))
 		),
 		tag(")") // discard
-	)(args).map_err(crate::MAP_ERR)?;
+	)(args)?;
 	// parsing header end
 	// parsing block starts
 	let code_block = code_block.trim();
@@ -60,7 +67,7 @@ pub fn parse_func_declaration(input: &str) -> Result<(Function, &str), VerboseEr
 			multispace0::<&str, VerboseError<&str>>
 			))),
 		char::<&str, VerboseError<&str>>('}')
-	)(code_block).map_err(crate::MAP_ERR)?;
+	)(code_block)?;
 	let statements = statements.into_iter().map(|f| f.1.trim().to_string()).collect::<Vec<String>>();
 	// parsing block end
 	Ok((Function {

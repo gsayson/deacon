@@ -1,0 +1,11 @@
+[package]
+name = "deacon-engine"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+deacon-parse = { path = "../deacon-parse" }
+nom = "7.1.1"
+ariadne = "0.1.5"

@@ -1,4 +1,5 @@
 #![feature(let_chains)]
+#![feature(exact_size_is_empty)]
 
 mod commands;
 mod integrations;

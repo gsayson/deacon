@@ -7,6 +7,7 @@
       <sourceFolder url="file://$MODULE_DIR$/deacon-config/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/deacon-parse/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/deacon-setup/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/deacon-engine/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/deacon/target" />
     </content>

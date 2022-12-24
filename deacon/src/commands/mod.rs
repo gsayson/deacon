@@ -19,9 +19,10 @@ pub fn resolve_function(input: impl AsRef<str>) -> bool {
 	}
 	match input.split_whitespace().next().unwrap() {
 		"cd" => change_dir(input),
-		"devconinfo" => print_devcon_info(),
+		"dcinfo" => print_devcon_info(),
 		"help" => print_help(),
 		"ls" => list_dir(input),
+		"dclint" => de_lint(input),
 		&_ => {
 			return false;
 		}
@@ -152,7 +153,7 @@ pub fn list_dir(input: impl AsRef<str>) {
 	}
 }
 
-#[test]
-fn s() {
-    println!("{}", PathBuf::from("D:\\Intrinsic Native Virtual Machine.docx").canonicalize().unwrap().file_name().unwrap().to_string_lossy().as_ref());
+pub fn de_lint(input: impl AsRef<str>) {
+	let success = deacon_engine::lint_script(input.as_ref().split_whitespace().skip(1).next().unwrap()).is_some();
+	println!("Lint success: {}", success);
 }

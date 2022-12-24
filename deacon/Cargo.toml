@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 deacon-parse = { path = "../deacon-parse" }
+deacon-engine = { path = "../deacon-engine" }
 rustyline = "10.0.0"
 rustyline-derive = "0.7.0"
 miette = { version = "5.5.0", features = ["fancy"] }
@@ -24,6 +25,7 @@ byte-unit = "4.0.18"
 git2 = "0.15.0"
 substring = "1.4.5"
 nerd_fonts = "0.1.9"
+ariadne = "0.1.5"
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.43.0", features = [
