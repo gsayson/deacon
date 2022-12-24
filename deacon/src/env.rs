@@ -1,9 +1,8 @@
 //! Environment management and process execution.
 
-use std::ops::Range;
 use std::process::*;
 use ansi_term::Colour::Red;
-use ariadne::{FnCache, Label, ReportKind, Source};
+use ariadne::{Label, ReportKind, Source};
 
 /// Executes a process. Printing to the console is not done.
 pub fn execute_process(input: impl ToString) -> Option<(Command, Child)> {

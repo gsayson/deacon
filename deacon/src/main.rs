@@ -91,6 +91,22 @@ fn main() -> Result<()> {
             ""
         }
     })));
+
+    std::panic::set_hook(Box::new(|panic_info| {
+        use ariadne::*;
+        let location = panic_info.location().unwrap(); // current version always returns `Some`
+        let x = *panic_info.payload().downcast_ref::<&str>().unwrap_or(&"What just happened??");
+        Report::build(ReportKind::Error, (), 0)
+            .with_code("panic")
+            .with_message("Please file an issue on our GitHub and report this bug!")
+            .with_label(Label::new(0..x.len()).with_message("Sneaky little bug!"))
+            .with_help(format!("Looks like it happened in '{}', {}:{}", location.file().replace("\\", "/"), location.line(), location.column()))
+            .with_note("You can find Deacon at https://github.com/gsayson/deacon/")
+            .finish()
+            .eprint(Source::from(x))
+            .unwrap_or(());
+    }));
+
     let mut rl = Editor::<MyHelper>::with_config(
         Config::builder()
             .completion_type(CompletionType::Circular)

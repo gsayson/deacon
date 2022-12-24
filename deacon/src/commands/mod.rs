@@ -23,6 +23,7 @@ pub fn resolve_function(input: impl AsRef<str>) -> bool {
 		"help" => print_help(),
 		"ls" => list_dir(input),
 		"dclint" => de_lint(input),
+		"rust-panic" => panic!("You forced me to panic!"),
 		&_ => {
 			return false;
 		}
