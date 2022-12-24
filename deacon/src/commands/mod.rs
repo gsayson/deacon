@@ -72,6 +72,10 @@ pub fn list_dir(input: impl AsRef<str>) {
 	}
 	match dir {
 		Ok(dir) => {
+			if dir.is_file() {
+				println!("{}", dir.to_string_lossy());
+				return;
+			}
 			table.set_header(vec![
 				"File",
 				"Type",
