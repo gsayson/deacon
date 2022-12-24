@@ -1,5 +1,6 @@
 #![feature(let_chains)]
 #![feature(exact_size_is_empty)]
+#![feature(iter_intersperse)]
 
 mod commands;
 mod integrations;
@@ -158,6 +159,13 @@ fn main() -> Result<()> {
                     continue;
                 } else {
                     let line = env::substitute_env_var(line);
+                    let line = line.split_whitespace()
+                        .map(|f| if f.trim().starts_with("\"") || f.trim().starts_with("\'") {
+                            f.to_string()
+                        } else {
+                            f.replace("~", &*dirs::home_dir().map(|f| f.to_string_lossy().to_string()).unwrap_or(String::from("~")))
+                        }).intersperse(" ".parse().unwrap())
+                        .collect::<String>();
                     let line = &line;
                     if !line.starts_with("exit") {
                         rl.add_history_entry(line);

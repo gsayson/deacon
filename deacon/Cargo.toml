@@ -1,6 +1,6 @@
 [package]
 name = "deacon"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 
 [dependencies]
@@ -26,6 +26,7 @@ git2 = "0.15.0"
 substring = "1.4.5"
 nerd_fonts = "0.1.9"
 ariadne = "0.1.5"
+dirs = "4.0.0"
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.43.0", features = [
