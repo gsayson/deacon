@@ -32,15 +32,15 @@ pub fn resolve_function(input: impl AsRef<str>) -> bool {
 }
 
 pub fn change_dir(input: impl AsRef<str>) {
-	let input = input.as_ref();
-	let path = input.split_whitespace().skip(1).next();
+    let input = input.as_ref();
+    let path = input.split_whitespace().skip(1).next();
 
 
     let path = if let Some(p) = path { p.to_owned() } else {
         let home = match std::env::var("HOME") {
             Ok(path) =>  path,
             Err(_) => {
-                eprintln!("Failed to change directory, `$HOME` is not set!");
+                eprintln!("{}", Red.paint(format!("Failed to change directory, `$HOME` is not set!")));
                 return;
             }
         };
@@ -48,11 +48,8 @@ pub fn change_dir(input: impl AsRef<str>) {
         home
     };
 
-    match env::set_current_dir(path) {
-        Ok(_) => {}
-        Err(err) => {
-            eprintln!("{}", Red.paint(format!("Failed to change directory: {}", err.to_string())));
-        }
+    if let Err(err) = env::set_current_dir(path) {
+        eprintln!("{}", Red.paint(format!("Failed to change directory: {}", err.to_string())));
     }
 }
 
