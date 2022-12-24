@@ -35,8 +35,7 @@ use crate::alpha_underscore_1;
 /// parser uses **streaming** parsers (since it has to handle newlines).
 pub fn parse_func_declaration(input: &str) -> Result<(Function, &str), nom::Err<VerboseError<&str>>> {
 
-	use nom::bytes::streaming::{tag, take_till, take_while};
-	use nom::character::streaming::{alpha1, char, multispace0, newline};
+	use nom::character::streaming::char;
 
 	// parsing header start
 	let mut input = input;
@@ -46,7 +45,7 @@ pub fn parse_func_declaration(input: &str) -> Result<(Function, &str), nom::Err<
 		input = export_tag.unwrap().0;
 	}
 	let input = input.trim();
-	let header = cut(tag::<_, &str, VerboseError<&str>>("func"))(input)?.0.trim();
+	let header = tag::<_, &str, VerboseError<&str>>("func")(input)?.0.trim();
 	let (args, name) = terminated(alpha_underscore_1::<&str, VerboseError<&str>>, tag::<_, &str, VerboseError<&str>>("("))(header)?;
 	let (code_block, args) = terminated(
 		separated_list0(
