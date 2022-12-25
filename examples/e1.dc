@@ -1,0 +1,14 @@
+func a() {
+    help
+    if true
+    do this
+}
+
+func b() {
+    help
+    if true
+    do this
+}
+
+func x() { echo "Hello, world!"
+    echo "Hallo Welt!" }

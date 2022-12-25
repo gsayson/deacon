@@ -4,7 +4,7 @@ use std::hint::unreachable_unchecked;
 use nom::character::complete::{alpha1, char, multispace0};
 use nom::error::VerboseError;
 use nom::multi::separated_list0;
-use nom::sequence::{delimited, tuple};
+use nom::sequence::delimited;
 use crate::types::DeaconType::Tuple;
 
 #[derive(Eq, PartialEq, Debug, Clone)]

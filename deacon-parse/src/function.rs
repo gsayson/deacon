@@ -1,22 +1,22 @@
 //! Function declaration handlers and tables.
 
 use std::hint::unreachable_unchecked;
-use nom::bytes::complete::{tag, take_till, take_while};
-use nom::character::complete::{alpha1, char, multispace0, newline};
-use nom::combinator::cut;
-use nom::error::VerboseError;
-use nom::multi::{many0, separated_list0};
+use nom::bytes::complete::{tag, take_while};
+use nom::character::complete::{alpha1, multispace0};
+use nom::error::{ErrorKind, ParseError, VerboseError};
+use nom::IResult;
+use nom::multi::separated_list0;
 use nom::sequence::{delimited, terminated, tuple};
 use crate::alpha_underscore_1;
 
 /// Parses a function. The syntax for a function is:
-/// ```no-run
+/// ```sh
 /// 'export'? 'func' IDENTIFIER '(' (TYPE IDENTIFIER)* ')' '{'
 ///     STATEMENT*
 /// '}'
 /// ```
 /// So, an example function which simply runs the `echo` command can be defined like:
-/// ```no-run
+/// ```sh
 /// func echo(parameter: string) {
 ///     echo $parameter
 /// }
@@ -57,17 +57,13 @@ pub fn parse_func_declaration(input: &str) -> Result<(Function, &str), nom::Err<
 	// parsing header end
 	// parsing block starts
 	let code_block = code_block.trim();
-	let (remainder, statements): (&str, Vec<(_, &str, _, _)>) = delimited(
-		tuple((char::<&str, VerboseError<&str>>('{'), newline::<&str, VerboseError<&str>>)),
-		many0(tuple((
-			multispace0::<&str, VerboseError<&str>>,
-			take_till(|f| f == '\n'),
-			newline::<&str, VerboseError<&str>>,
-			multispace0::<&str, VerboseError<&str>>
-			))),
+	let (remainder, statements): (&str, &str) = delimited(
+		char::<&str, VerboseError<&str>>('{'),
+		take_until_unbalanced('{', '}'), // doesn't support nested {} yet; use parse_hyperlinks::take_until_unbalanced
 		char::<&str, VerboseError<&str>>('}')
 	)(code_block)?;
-	let statements = statements.into_iter().map(|f| f.1.trim().to_string()).collect::<Vec<String>>();
+	let statements = statements.trim().lines();
+	let statements = statements.into_iter().map(|f| f.trim().to_string()).collect::<Vec<String>>();
 	// parsing block end
 	Ok((Function {
 			name: name.to_string(),
@@ -88,18 +84,18 @@ pub fn parse_func_declaration(input: &str) -> Result<(Function, &str), nom::Err<
 }
 
 /// Parses a call. The syntax for a call is:
-/// ```no-run
+/// ```sh
 /// COMMAND ARGUMENT* | FUNCTION ARGUMENT*
 /// ```
 /// Calls are the building blocks of Deacon. When you execute any command,
 /// you are executing a call. For example (note that `$` is the default prompt and therefore it is present here),
-/// ```no-run
+/// ```sh
 /// $ help
 /// ```
 ///
 /// Calls, other than being the execution of commands, can also be
 /// function calls. For example,
-/// ```no-run
+/// ```sh
 /// $ echo "string"
 /// ```
 /// makes a call to the `echo` function (defined in the documentation of the [`parse_fn`](self::parse_func_declaration) function).
@@ -147,4 +143,76 @@ pub struct Function {
 	pub name: String,
 	pub args: Vec<FormalArg>,
 	pub body: Vec<String>
+}
+
+//                   MIT LICENSE:
+// Permission is hereby granted, free of charge, to any
+// person obtaining a copy of this software and associated
+// documentation files (the "Software"), to deal in the
+// Software without restriction, including without
+// limitation the rights to use, copy, modify, merge,
+// publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software
+// is furnished to do so, subject to the following
+// conditions:
+//
+// The above copyright notice and this permission notice
+// shall be included in all copies or substantial portions
+// of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+// ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+// TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+// SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+// IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+// DEALINGS IN THE SOFTWARE.
+//
+// take_until_unbalanced: Copyright (C) the maintainer of `parse_hyperlinks`
+fn take_until_unbalanced(
+	opening_bracket: char,
+	closing_bracket: char,
+) -> impl Fn(&str) -> IResult<&str, &str, VerboseError<&str>> {
+	move |i: &str| {
+		let mut index = 0;
+		let mut bracket_counter = 0;
+		while let Some(n) = &i[index..].find(&[opening_bracket, closing_bracket, '\\'][..]) {
+			index += n;
+			let mut it = i[index..].chars();
+			match it.next().unwrap_or_default() {
+				c if c == '\\' => {
+					// Skip the escape char `\`.
+					index += '\\'.len_utf8();
+					// Skip also the following char.
+					let c = it.next().unwrap_or_default();
+					index += c.len_utf8();
+				}
+				c if c == opening_bracket => {
+					bracket_counter += 1;
+					index += opening_bracket.len_utf8();
+				}
+				c if c == closing_bracket => {
+					// Closing bracket.
+					bracket_counter -= 1;
+					index += closing_bracket.len_utf8();
+				}
+				// Can not happen.
+				_ => unreachable!(),
+			};
+			// We found the unmatched closing bracket.
+			if bracket_counter == -1 {
+				// We do not consume it.
+				index -= closing_bracket.len_utf8();
+				return Ok((&i[index..], &i[0..index]));
+			};
+		}
+
+		if bracket_counter == 0 {
+			Ok(("", i))
+		} else {
+			Err(nom::Err::Error(VerboseError::from_error_kind(i, ErrorKind::TakeUntil)))
+		}
+	}
 }

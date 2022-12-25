@@ -1,17 +1,13 @@
 //! Standard variable parsing.
-
-use nom::branch::alt;
-use nom::bytes::complete::{tag, take_until, take_while1};
+use nom::bytes::complete::{tag, take_while1};
 use nom::character::complete::{char, multispace1};
 use nom::character::streaming::multispace0;
-use nom::combinator::success;
 use nom::error::VerboseError;
-use nom::IResult;
 use nom::sequence::tuple;
 use crate::alpha_underscore_1;
 
 /// Parse a variable declaration in the form:
-/// ```no-run
+/// ```sh
 /// 'let' WHITESPACE '$' IDENTIFIER '=' value
 /// ```
 /// Note that if there was a previous variable by the given name in the given declaration's
@@ -38,7 +34,7 @@ pub fn parse_variable_decl(input: &str) -> Result<Variable, VerboseError<&str>> 
 }
 
 /// Parse a variable reassignment in the form:
-/// ```no-run
+/// ```sh
 /// WHITESPACE '$' IDENTIFIER '=' value
 /// ```
 /// Note that this totally differs from [variable declaration](self::parse_variable_decl), which frees old variables

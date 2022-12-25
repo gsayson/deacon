@@ -1,5 +1,5 @@
 <div style="text-align: center;"><h1>Deacon</h1></div>
-<div style="text-align: center;">Shell 0.2.1</div>
+<div style="text-align: center;">Shell 0.2.3</div>
 <br>
 <div style="text-align: center;"><img src="images/deacon-example.png" alt="The greeting"></div>
 
@@ -27,19 +27,10 @@ func x() {
 }
 ```
 
-You must start with a newline before the `{` character and end with another newline before the ending `}`. In other words,
+~~You must start with a newline before the `{` character and end with another newline before the ending `}`~~
+The following is now permitted:
 
 ```
-func x() { echo "Hello, world!" 
+func x() { echo "Hello, world!"
     echo "Hallo Welt!" }
 ```
-
-will produce an error, and
-
-```
-func x() { 
-    echo "Hello, world!"
-}
-```
-
-will not.

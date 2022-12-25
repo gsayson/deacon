@@ -114,7 +114,8 @@ mod tests {
 	    assert!(parse_func_declaration("func a() {\necho $s\n}").is_ok());
 		assert!(parse_func_declaration("func b(s: string) {\necho $s\n}").is_ok());
 		assert!(parse_func_declaration("func c(s: string) {echo $s\n}").is_err());
-		assert!(parse_func_declaration("func d(s: string) {\necho $s}").is_err());
+		assert!(parse_func_declaration("func d(s: string) {\necho $s}").is_ok());
+		assert!(parse_func_declaration("func d(s: string) {\necho $s\necho $s\n}").is_ok());
 		assert_eq!(parse_func_declaration("func e() {\necho $s\n}").unwrap().0.name, "e");
 		assert_eq!(parse_func_declaration("func f() {\necho $s\n}").unwrap().0.name, "f");
 	}
