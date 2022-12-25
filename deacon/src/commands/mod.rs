@@ -8,6 +8,7 @@ use byte_unit::Byte;
 use chrono::{Local, NaiveDateTime};
 use comfy_table::presets::UTF8_FULL;
 use comfy_table::Table;
+use dirs::home_dir;
 use crate::util::print_help;
 
 // input is guaranteed to NOT be blank.
@@ -35,17 +36,16 @@ pub fn change_dir(input: impl AsRef<str>) {
     let input = input.as_ref();
     let path = input.split_whitespace().skip(1).next();
 
-
-    let path = if let Some(p) = path { p.to_owned() } else {
-        let home = match std::env::var("HOME") {
-            Ok(path) =>  path,
-            Err(_) => {
-                eprintln!("{}", Red.paint(format!("Failed to change directory, `$HOME` is not set!")));
+    let path = if let Some(p) = path {
+	    PathBuf::from(p)
+    } else {
+        match home_dir() {
+            Some(path) => path,
+            None => {
+                eprintln!("{}", Red.paint(format!("Failed to change directory, no path is given and `$HOME` is not set!")));
                 return;
             }
-        };
-
-        home
+        }
     };
 
     if let Err(err) = env::set_current_dir(path) {
