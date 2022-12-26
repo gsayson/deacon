@@ -12,6 +12,7 @@ use std::borrow::Cow::{Borrowed, Owned};
 use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
 use ansi_term::Colour::*;
+use ariadne::{Label, ReportKind, Source};
 use chrono::*;
 use guess_host_triple::guess_host_triple;
 use rustyline::*;
@@ -166,7 +167,19 @@ fn main() -> Result<()> {
                             f.replace("~", &*dirs::home_dir().map(|f| f.to_string_lossy().to_string()).unwrap_or(String::from("~")))
                         }).intersperse(" ".parse().unwrap())
                         .collect::<String>();
-                    let line = &line;
+                    let line: &str = &line;
+                    if !line.trim().is_empty() && line.split_whitespace().next().unwrap().trim() == "!" {
+                        ariadne::Report::build(ReportKind::Error, (), line.find("!").unwrap())
+                            .with_code(1)
+                            .with_message("Exclamation-mark builtin escape syntax is used without any process name")
+                            .with_help("Include the name of the process you want to execute after the exclamation mark.")
+                            .with_note("If you wanted to have a if-not statement, use the `not` builtin command instead.")
+                            .with_label(Label::new(line.find("!").unwrap()..(line.find("!").unwrap() + 1)).with_message("The exclamation mark is used by itself"))
+                            .finish()
+                            .eprint(Source::from(line))
+                            .unwrap_or(());
+                        continue
+                    }
                     if !line.starts_with("exit") {
                         rl.add_history_entry(line);
                         if line.starts_with("clear") {

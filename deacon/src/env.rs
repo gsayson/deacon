@@ -2,12 +2,10 @@
 
 use std::process::*;
 use ansi_term::Colour::Red;
-use ariadne::{Label, ReportKind, Source};
 
 /// Executes a process. Printing to the console is not done.
 pub fn execute_process(input: impl ToString) -> Option<(Command, Child)> {
 	let mut input = input.to_string();
-	let input_original = input.clone();
 	if input.starts_with("!") {
 		input = input.replacen("!", "", 1);
 	}
@@ -20,15 +18,6 @@ pub fn execute_process(input: impl ToString) -> Option<(Command, Child)> {
 			let mut iter = split.iter();
 			if iter.is_empty() {
 				// there is nothing; this is therefore invalid syntax
-				ariadne::Report::build(ReportKind::Error, (), input_original.find("!").unwrap())
-					.with_code(1)
-					.with_message("Exclamation-mark builtin escape syntax is used without any process name")
-					.with_help("Include the name of the process you want to execute after the exclamation mark.")
-					.with_note("If you wanted to have a if-not statement, use the `not` builtin command instead.")
-					.with_label(Label::new(input_original.find("!").unwrap()..(input_original.find("!").unwrap() + 1)).with_message("The exclamation mark is used by itself"))
-					.finish()
-					.eprint(Source::from(input_original))
-					.unwrap_or(());
 				return None;
 			}
 			let command_name = iter.next();
