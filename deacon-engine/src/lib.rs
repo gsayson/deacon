@@ -30,20 +30,20 @@ use deacon_parse::function::*;
 //     deacon_parse::function::parse_func_declaration()
 // }
 
-pub fn lint_script(file: impl AsRef<Path>) -> Option<()> {
+pub fn lint_script(file: impl AsRef<Path>) -> Option<(Vec<Function>, Vec<String>)> {
     let path = file.as_ref();
     let mut file = File::open(path).ok()?;
     let mut input = String::new();
     file.read_to_string(&mut input).ok()?;
     let full_input = input.clone();
     let mut function_vec = vec![];
+    let mut statement_vec = vec![];
     loop {
         if input.trim().is_empty() {
             break
         }
         match parse_func_declaration(&input) {
             Ok((func, remainder)) => {
-                println!("{:?}", func);
                 function_vec.push(func);
                 let remainder = remainder.trim();
                 input = remainder.to_string();
@@ -51,9 +51,23 @@ pub fn lint_script(file: impl AsRef<Path>) -> Option<()> {
             }
             Err(err) => {
                 match err {
-                    nom::Err::Incomplete(_) => {
-                        println!("Incomplete!");
-                        break
+                    nom::Err::Incomplete(e) => {
+                        if !e.is_known() {
+                            // we now know it's a statement and not a function.
+                            let statement = input.trim().split_once("\n")
+                                .map(|f| f.0.trim())
+                                .unwrap_or(input.as_str())
+                                .trim();
+                            if statement.is_empty() {
+                                break
+                            }
+                            statement_vec.push(statement.to_string());
+                            input = input.replacen(statement, "", 1);
+                            continue
+                        } else {
+                            println!("Incomplete!");
+                            break
+                        }
                     }
                     nom::Err::Error(e) => {
                         for(affected, kind) in e.errors {
@@ -90,7 +104,7 @@ pub fn lint_script(file: impl AsRef<Path>) -> Option<()> {
             }
         }
     }
-    Some(())
+    Some((function_vec, statement_vec))
 }
 
 /// The `Either` type.

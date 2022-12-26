@@ -2,9 +2,10 @@
 
 use std::hint::unreachable_unchecked;
 use nom::bytes::complete::{tag, take_while};
-use nom::character::complete::{alpha1, multispace0};
+use nom::character::complete::{alpha1, char, multispace0};
+use nom::Err::Incomplete;
 use nom::error::{ErrorKind, ParseError, VerboseError};
-use nom::IResult;
+use nom::{IResult, Needed};
 use nom::multi::separated_list0;
 use nom::sequence::{delimited, terminated, tuple};
 use crate::alpha_underscore_1;
@@ -35,8 +36,6 @@ use crate::alpha_underscore_1;
 /// parser uses **streaming** parsers (since it has to handle newlines).
 pub fn parse_func_declaration(input: &str) -> Result<(Function, &str), nom::Err<VerboseError<&str>>> {
 
-	use nom::character::streaming::char;
-
 	// parsing header start
 	let mut input = input;
 	let export_tag = tag::<_, &str, ()>("export")(input);
@@ -45,7 +44,13 @@ pub fn parse_func_declaration(input: &str) -> Result<(Function, &str), nom::Err<
 		input = export_tag.unwrap().0;
 	}
 	let input = input.trim();
-	let header = tag::<_, &str, VerboseError<&str>>("func")(input)?.0.trim();
+	let header = tag::<_, &str, VerboseError<&str>>("func")(input)
+		.map_err(|f| match f {
+			Incomplete(_) => unsafe { unreachable_unchecked() }
+			nom::Err::Error(_) | nom::Err::Failure(_) => {
+				Incomplete(Needed::Unknown) // returning incomplete gives a telltale sign of a func decl.; Needed::Unknown is going to be our magic value.
+			}
+		})?.0.trim();
 	let (args, name) = terminated(alpha_underscore_1::<&str, VerboseError<&str>>, tag::<_, &str, VerboseError<&str>>("("))(header)?;
 	let (code_block, args) = terminated(
 		separated_list0(

@@ -5,10 +5,18 @@ func a() {
 }
 
 func b() {
+
     help
     if true
     do this
 }
 
-func x() { echo "Hello, world!"
+echo "b before x"
+
+func x(s: string) { echo "Hello, world!"
     echo "Hallo Welt!" }
+
+echo "Hello, world!"
+help
+ls dir
+x
