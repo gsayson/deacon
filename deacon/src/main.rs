@@ -172,7 +172,7 @@ fn main() -> Result<()> {
                         ariadne::Report::build(ReportKind::Error, (), line.find("!").unwrap())
                             .with_code(1)
                             .with_message("Exclamation-mark builtin escape syntax is used without any process name")
-                            .with_help("Include the name of the process you want to execute after the exclamation mark.")
+                            .with_help("Include the name of the process you want to execute after the exclamation mark (without any whitespace).")
                             .with_note("If you wanted to have a if-not statement, use the `not` builtin command instead.")
                             .with_label(Label::new(line.find("!").unwrap()..(line.find("!").unwrap() + 1)).with_message("The exclamation mark is used by itself"))
                             .finish()
